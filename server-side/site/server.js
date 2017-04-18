@@ -8,6 +8,9 @@ var express = require('express'),
 	study = require('./routes/study.js'),
 	admin = require('./routes/admin.js')
 	;
+var redis = require('redis');
+
+var client = redis.createClient(6379, '127.0.0.1', {})
 
 var app = express();
 
@@ -85,7 +88,24 @@ app.post('/api/study/admin/notify/', admin.notifyParticipant);
 // app.get('/api/design/survey/vote/status', votes.status );
 // app.get('/api/design/survey/vote/stat/:id', votes.getSurveyStats );
 
+var PORT=3003;
+var server = app.listen(PORT, function ()
+ {
+
+   var host = server.address().address
+   var port = server.address().port
+   console.log('Listening on port 3003...');
+
+   console.log('Example app listening at http://%s:%s', host, port)
+   client.lpush("availableports",port);
+
+      client.llen("availableports",function(err, availports)
+   {
+   	console.log(availports);
+   });
+
+ });
 
 
-app.listen(3003);
-console.log('Listening on port 3003...');
+// app.listen(3003);
+
