@@ -19,6 +19,10 @@
     "async": "*",
     "escodegen": "^1.4.1",
     "esprima": "^1.2.2",
-    "istanbul": "^0.3.2"
+    "multer": "^0.1.8",
+    "redis": "^0.12.1",
+    "istanbul": "^0.3.2",
+    "http-proxy": "^1.9.0",
+    "request": "^2.54.0"
   }
 }
