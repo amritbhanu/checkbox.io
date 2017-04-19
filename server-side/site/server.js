@@ -8,11 +8,45 @@ var express = require('express'),
 	study = require('./routes/study.js'),
 	admin = require('./routes/admin.js')
 	;
-//var redis = require('redis');
+var app = express()
+var redis = require('redis')
+var multer  = require('multer')
+var http      = require('http');
+var httpProxy = require('http-proxy');
+var express = require('express')
+var client = redis.createClient(6379, "", {})
 
-//var client = redis.createClient(6379, '127.0.0.1', {})
+var ports = {};
+var proxy   = httpProxy.createProxyServer(ports);
+var server1  = http.createServer(function(req, res)
+{ 
+  client.rpoplpush('ips','ips',function(err,value) 
+  {
+    if (err) throw err;
+    proxy.web( req, res, {target: "http://"+value+":3003" } );
+    console.log("Redirecting to ip :"+value)
+  })
+});
 
-var app = express();
+console.log("Proxy server listening on port: 3000");
+server1.listen(3000)
+
+var PORT=3003;
+var server = app.listen(PORT, function ()
+ {
+
+   var host = server.address().address
+   var port = server.address().port
+
+   console.log('Example app listening at http://%s:%s', host, port)
+   client.lpush("ips",host);
+
+      client.llen("ips",function(err, availports)
+   {
+   	console.log(availports);
+   });
+
+ });
 
 app.configure(function () {
 	app.use(express.static('../../public_html/'));
@@ -40,16 +74,6 @@ app.post('/api/design/survey',
 	}
 );
 
-// app.get('/api/design/survey/all', routes.findAll );
-// app.get('/api/design/survey/:id', routes.findById );
-// app.get('/api/design/survey/admin/:token', routes.findByToken );
-
-// app.post('/api/design/survey/save', routes.saveSurvey );
-// app.post('/api/design/survey/open/', routes.openSurvey );
-// app.post('/api/design/survey/close/', routes.closeSurvey );
-// app.post('/api/design/survey/notify/', routes.notifyParticipant );
-
-
 //// ################################
 // Towards general study management.
 app.get('/api/study/load/:id', study.loadStudy );
@@ -70,43 +94,17 @@ app.post('/api/study/admin/open/', admin.openStudy );
 app.post('/api/study/admin/close/', admin.closeStudy );
 app.post('/api/study/admin/notify/', admin.notifyParticipant);
 
-//// ################################
 
-// app.post('/api/upload', upload.uploadFile );
+app.get('/hiddenFeature', function(req, res){
+		client.get('featureFlag', function(err, flagValue){
+			if(err) throw err;
+			if(flagValue === 'true')
+				res.status(200).send('Congratulations! You can use this new feature.');
+			else res.status(200).send('Sorry! This feature is not yet available.');
+});
 
-// // survey listing for studies.
-// app.get('/api/design/survey/all/listing', routes.studyListing );
 
-// // Download
-// app.get('/api/design/survey/vote/download/:token', votes.download );
-// // Winner
-// app.get('/api/design/survey/winner/:token', votes.pickParticipant );
-
-// // Voting
-// app.get('/api/design/survey/vote/all', votes.findAll );
-// app.post('/api/design/survey/vote/cast', votes.castVote );
-// app.get('/api/design/survey/vote/status', votes.status );
-// app.get('/api/design/survey/vote/stat/:id', votes.getSurveyStats );
-
-// var PORT=3003;
-// var server = app.listen(PORT, function ()
-//  {
-
-//    var host = server.address().address
-//    var port = server.address().port
+// app.listen(PORT);
 //    console.log('Listening on port 3003...');
 
-//    console.log('Example app listening at http://%s:%s', host, port)
-//    client.lpush("availableports",port);
-
-//       client.llen("availableports",function(err, availports)
-//    {
-//    	console.log(availports);
-//    });
-
-//  });
-
-
-app.listen(3003);
-   console.log('Listening on port 3003...');
 
