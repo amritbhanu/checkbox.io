@@ -14,7 +14,7 @@ var multer  = require('multer')
 var http      = require('http');
 var httpProxy = require('http-proxy');
 var express = require('express')
-var client = redis.createClient(6379, "", {})
+var client=redis.createClient(6379, "", {})
 
 var ports = {};
 var proxy   = httpProxy.createProxyServer(ports);
@@ -27,9 +27,21 @@ var server1  = http.createServer(function(req, res)
     console.log("Redirecting to ip :"+value)
   })
 });
-
 console.log("Proxy server listening on port: 3000");
 server1.listen(3000)
+
+var fs = require('fs'),
+    readline = require('readline');
+
+var rd = readline.createInterface({
+    input: fs.createReadStream('/home/ubuntu/nodes'),
+    output: process.stdout,
+    console: false
+});
+
+rd.on('line', function(line) {
+	client.lpush("ips",line);
+});
 
 var PORT=3003;
 var server = app.listen(PORT, function ()
@@ -39,13 +51,6 @@ var server = app.listen(PORT, function ()
    var port = server.address().port
 
    console.log('Example app listening at http://%s:%s', host, port)
-   client.lpush("ips",host);
-
-      client.llen("ips",function(err, availports)
-   {
-   	console.log(availports);
-   });
-
  });
 
 app.configure(function () {
@@ -101,8 +106,8 @@ app.get('/hiddenFeature', function(req, res){
 			if(flagValue === 'true')
 				res.status(200).send('Congratulations! You can use this new feature.');
 			else res.status(200).send('Sorry! This feature is not yet available.');
+	});
 });
-
 
 // app.listen(PORT);
 //    console.log('Listening on port 3003...');
