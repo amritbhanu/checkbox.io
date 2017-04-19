@@ -20,10 +20,10 @@ var ports = {};
 var proxy   = httpProxy.createProxyServer(ports);
 var server1  = http.createServer(function(req, res)
 { 
-  client.rpoplpush('ips','ips',function(err,value) 
+  client.rpoplpush('proxy','proxy',function(err,value) 
   {
     if (err) throw err;
-    proxy.web( req, res, {target: "http://"+value+":3003" } );
+    proxy.web( req, res, {target: "http://0.0.0.0:3003" } );
     console.log("Redirecting to ip :"+value)
   })
 });
@@ -40,7 +40,7 @@ var rd = readline.createInterface({
 });
 
 rd.on('line', function(line) {
-	client.lpush("ips",line);
+	client.lpush("proxy",line);
 });
 
 var PORT=3003;
