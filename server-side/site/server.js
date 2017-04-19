@@ -10,25 +10,7 @@ var express = require('express'),
 	;
 var app = express()
 var redis = require('redis')
-var multer  = require('multer')
-var http      = require('http');
-var httpProxy = require('http-proxy');
-var express = require('express')
 var client=redis.createClient(6379, "", {})
-
-var ports = {};
-var proxy   = httpProxy.createProxyServer(ports);
-var server1  = http.createServer(function(req, res)
-{ 
-  client.rpoplpush('proxy','proxy',function(err,value) 
-  {
-    if (err) throw err;
-    proxy.web( req, res, {target: "http://0.0.0.0:3003" } );
-    console.log("Redirecting to ip :"+value)
-  })
-});
-console.log("Proxy server listening on port: 3000");
-server1.listen(3000)
 
 var fs = require('fs'),
     readline = require('readline');
@@ -42,6 +24,10 @@ var rd = readline.createInterface({
 rd.on('line', function(line) {
 	client.lpush("proxy",line);
 });
+
+var json = JSON.parse(fs.readFileSync('/home/ubuntu/checkbox.io/server-side/site/servers.json', 'utf8'));
+client.lpush("pro",json.pro);
+client.lpush("can",json.can);
 
 var PORT=3003;
 var server = app.listen(PORT, function ()
@@ -101,11 +87,11 @@ app.post('/api/study/admin/notify/', admin.notifyParticipant);
 
 
 app.get('/hiddenFeature', function(req, res){
-		client.get('featureFlag', function(err, flagValue){
+		client.get('featureflag', function(err, flagValue){
 			if(err) throw err;
 			if(flagValue === 'true')
-				res.status(200).send('Congratulations! You can use this new feature.');
-			else res.status(200).send('Sorry! This feature is not yet available.');
+				res.status(200).send('You can use this new feature.');
+			else res.status(200).send('Sorry! This feature is not available.');
 	});
 });
 
