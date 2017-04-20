@@ -26,7 +26,7 @@ rd.on('line', function(line) {
 });
 
 var json = JSON.parse(fs.readFileSync('/home/ubuntu/checkbox.io/server-side/site/servers.json', 'utf8'));
-client.lpush("pro",json.pro);
+client.lpush("pro",json.prod);
 client.lpush("can",json.can);
 
 var PORT=3003;

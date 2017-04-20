@@ -21,9 +21,9 @@ function redirectProd (request, response){
     if(err) throw err;
     count += 1;
     var prodIp = server;
-    var url = 'http://' + prodIp + ':3003';
+    var url = 'http://0.0.0.0:3003';
     // var url = server
-    console.log('redirecting to :', url);
+    console.log('redirecting to :', prodIp);
     count = count % 3;
     //response.status(200).send('Production!!\n');
     apiProxy.web(request, response, {target: url});
@@ -35,9 +35,9 @@ function redirectCanary (request, response){
     if(error) throw error;
     count += 1;
     var canaryIp = server;
-    var url = 'http://' + canaryIp + ':3003';
+    var url = 'http://0.0.0.0:3003';
     // var url = server;
-    console.log('redirecting to: ', url);
+    console.log('redirecting to: ', canaryIp);
     count =  count % 3;
     //response.status(200).send('Canary!!\n')
     apiProxy.web(request, response, {target: url});
