@@ -64,3 +64,4 @@ var proxyServer = app.listen('3001', function(){
 	var host = proxyServer.address().address;
 	var port = proxyServer.address().port;
 });
+var client = redis.createClient(6379, "34.210.23.153", {})

@@ -2,7 +2,7 @@ var redis = require('redis')
 var multer  = require('multer')
 var http      = require('http');
 var httpProxy = require('http-proxy');
-var client=redis.createClient(6379, "", {})
+var client = redis.createClient(6379, "34.210.23.153", {})
 
 var ports = {};
 var proxy   = httpProxy.createProxyServer(ports);
