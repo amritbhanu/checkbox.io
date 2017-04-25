@@ -21,7 +21,7 @@ http.createServer(function (req, res) {
 
 function loadBalance (req, res) {
 
-    client.rpoplpush('proxy','proxy', function(err, reply)
+    client.rpop('proxy', function(err, reply)
     {
         client.lindex('proxy', 0, function(err, ip)
         {
@@ -32,6 +32,7 @@ function loadBalance (req, res) {
             if (parseInt(xmlHttp.responseText) <= 15) {
                 target = 'http://' + ip+ ':3003';
                 console.log('target is: %s', target);
+                client.rpop('proxy',ip);
                 proxy.web(req, res,
                 {
                     target: target
