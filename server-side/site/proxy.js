@@ -4,7 +4,7 @@ var http      = require('http');
 var httpProxy = require('http-proxy');
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
-var client = redis.createClient(6379, "34.210.23.153", {})
+var client=redis.createClient(6379, "34.210.23.153", {})
 
 var proxy   = httpProxy.createProxyServer();
 

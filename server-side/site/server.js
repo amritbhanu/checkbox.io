@@ -10,7 +10,7 @@ var express = require('express'),
 	;
 var app = express()
 var redis = require('redis')
-var client = redis.createClient(6379, "34.210.23.153", {})
+var client=redis.createClient(6379, "34.210.23.153", {})
 var os = require('os');
 
 var fs = require('fs'),

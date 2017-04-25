@@ -3,7 +3,7 @@ var proxy = require('http-proxy');
 var app = express();
 var apiProxy = proxy.createProxyServer();
 var redis = require('redis');
-var client = redis.createClient(6379, "", {});
+var client=redis.createClient(6379, "", {});
 
 var count = 0;
 // var redirectAll = false;
