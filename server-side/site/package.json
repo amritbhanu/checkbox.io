@@ -23,6 +23,7 @@
     "redis": "^0.12.1",
     "istanbul": "^0.3.2",
     "http-proxy": "^1.9.0",
+    "xmlhttprequest": "*",
     "request": "^2.54.0"
   }
 }

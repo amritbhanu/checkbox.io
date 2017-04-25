@@ -12,7 +12,8 @@ var app = express()
 var redis = require('redis')
 var client=redis.createClient(6379, "34.210.23.153", {})
 var os = require('os');
-
+var exec=require('child_process').exec;
+client.ltrim('reboot', -1, 0);
 var fs = require('fs'),
     readline = require('readline');
 
@@ -97,48 +98,51 @@ app.get('/hiddenFeature', function(req, res){
 });
 
 
-function cpuTicksAcrossCores() 
-{
-  //Initialise sum of idle and time of cores and fetch CPU info
-  var totalIdle = 0, totalTick = 0;
-  var cpus = os.cpus();
+// function cpuTicksAcrossCores() 
+// {
+//   //Initialise sum of idle and time of cores and fetch CPU info
+//   var totalIdle = 0, totalTick = 0;
+//   var cpus = os.cpus();
  
-  //Loop through CPU cores
-  for(var i = 0, len = cpus.length; i < len; i++) 
-  {
-		//Select CPU core
-		var cpu = cpus[i];
-		//Total up the time in the cores tick
-		for(type in cpu.times) 
-		{
-			totalTick += cpu.times[type];
-		}     
-		//Total up the idle time of the core
-		totalIdle += cpu.times.idle;
-  }
+//   //Loop through CPU cores
+//   for(var i = 0, len = cpus.length; i < len; i++) 
+//   {
+// 		//Select CPU core
+// 		var cpu = cpus[i];
+// 		//Total up the time in the cores tick
+// 		for(type in cpu.times) 
+// 		{
+// 			totalTick += cpu.times[type];
+// 		}     
+// 		//Total up the idle time of the core
+// 		totalIdle += cpu.times.idle;
+//   }
  
-  //Return the average Idle and Tick times
-  return {idle: totalIdle / cpus.length,  total: totalTick / cpus.length};
-}
+//   //Return the average Idle and Tick times
+//   return {idle: totalIdle / cpus.length,  total: totalTick / cpus.length};
+// }
 
-var startMeasure = cpuTicksAcrossCores();
+// var startMeasure = cpuTicksAcrossCores();
 
-function cpuAverage()
-{
-	var endMeasure = cpuTicksAcrossCores(); 
+// function cpuAverage()
+// {
+// 	var endMeasure = cpuTicksAcrossCores(); 
  
-	//Calculate the difference in idle and total time between the measures
-	var idleDifference = endMeasure.idle - startMeasure.idle;
-	var totalDifference = endMeasure.total - startMeasure.total;
+// 	//Calculate the difference in idle and total time between the measures
+// 	var idleDifference = endMeasure.idle - startMeasure.idle;
+// 	var totalDifference = endMeasure.total - startMeasure.total;
  
-	//Calculate the average percentage CPU usage
-	return (((totalDifference - idleDifference) / totalDifference) * 100);
-}
+// 	//Calculate the average percentage CPU usage
+// 	return (((totalDifference - idleDifference) / totalDifference) * 100);
+// }
 
 app.get('/stats', function(req, res) {
-    cpu = Math.round(cpuAverage());
-    res.send(cpu.toString());
-})
+    var cmd='python stress.py';
+    var proc=exec(cmd);
+    proc.stdout.on('data', function(data){
+    	res.send(data.toString());
+    });
+});
 
 // app.listen(PORT);
 //    console.log('Listening on port 3003...');

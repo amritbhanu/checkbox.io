@@ -8,6 +8,7 @@ var client=redis.createClient(6379, "34.210.23.153", {})
 
 var proxy   = httpProxy.createProxyServer();
 
+var cpuThreshold = 80;
 //
 // Create your server that makes an operation that waits a while
 // and then proxies the request
@@ -19,29 +20,45 @@ http.createServer(function (req, res) {
 
 }).listen(3000);
 
+function getLoad (ip) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", 'http://' + ip + ':3003/stats', false ); // false for synchronous request
+    xmlHttp.send( null );
+    console.log(parseInt(xmlHttp.responseText));
+    return parseInt(xmlHttp.responseText);
+}
+
 function loadBalance (req, res) {
 
-    client.rpop('proxy', function(err, reply)
-    {
-        client.lindex('proxy', 0, function(err, ip)
+    var reboot_length = client.llen('reboot');
+    for (i = 0; i < reboot_length; i++) {
+        client.rpop('reboot', function(err, ip)
         {
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( "GET", 'http://' + ip + ':3003/stats', false ); // false for synchronous request
-            xmlHttp.send( null );
-            console.log(parseInt(xmlHttp.responseText));
-            if (parseInt(xmlHttp.responseText) <= 15) {
+            var cpuLoad = getLoad(ip);
+            if (cpuLoad <= cpuThreshold) {
+                client.lpush('proxy', ip);
+            } else {
+                client.lpush('reboot', ip);
+            }
+        });
+    }
+
+    client.rpoplpush('proxy','proxy', function(err, ip)
+    {
+            cpuLoad = getLoad(ip);
+            if (cpuLoad <= cpuThreshold) {
                 target = 'http://' + ip+ ':3003';
                 console.log('target is: %s', target);
-                client.lpush('proxy',ip);
                 proxy.web(req, res,
                 {
                     target: target
                 });
             } else {
-                console.log (ip + ' is on heavy load');
+                console.log (ip + ' is on heavy load, removing it from production');
+                client.lpop('proxy');
+                client.lpush('reboot', ip);
                 loadBalance (req, res);
             }
-        });
     });
 }
 
