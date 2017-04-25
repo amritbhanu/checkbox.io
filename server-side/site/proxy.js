@@ -32,7 +32,7 @@ function loadBalance (req, res) {
             if (parseInt(xmlHttp.responseText) <= 15) {
                 target = 'http://' + ip+ ':3003';
                 console.log('target is: %s', target);
-                client.rpop('proxy',ip);
+                client.lpush('proxy',ip);
                 proxy.web(req, res,
                 {
                     target: target
